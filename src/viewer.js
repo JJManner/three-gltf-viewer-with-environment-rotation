@@ -80,7 +80,7 @@ export class Viewer {
 			backgroundBlurriness: 0,
 
 			// Lights
-			punctualLights: true,
+			punctualLights: false,
 			exposure: 0, // this exposure varies by the model, THIS VALUE should be included in the opening link 
 			toneMapping: LinearToneMapping,
 			ambientIntensity: 0.3,
@@ -297,7 +297,7 @@ export class Viewer {
 		this.scene.add(object);
 		this.content = object;
 
-		this.state.punctualLights = true;
+		this.state.punctualLights = false;
 
 		this.content.traverse((node) => {
 			if (node.isLight) {
