@@ -67,8 +67,8 @@ export class Viewer {
 			environment:
 				options.preset === Preset.ASSET_GENERATOR
 					? environments.find((e) => e.id === 'footprint-court').name
-					: environments[2].name, // this defines the environment used, no 2 is the Clear Sky
-			background: false,
+					: environments[5].name, // this defines the environment used, no 2 is the Clear Sky
+			background: true,
 			playbackSpeed: 1.0,
 			actionStates: {},
 			camera: DEFAULT_CAMERA,
