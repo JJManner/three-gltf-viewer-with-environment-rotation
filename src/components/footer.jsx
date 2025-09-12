@@ -14,19 +14,7 @@ export function Footer() {
 				|
 			</span>
 
-			<a
-				class="item"
-				target="_blank"
-				href="https://github.com/donmccurdy/three-gltf-viewer/issues/new"
-			>
-				help & feedback
-			</a>
-
-			<span class="separator" aria-hidden="true">
-				|
-			</span>
-
-			<a class="item" target="_blank" href="https://github.com/donmccurdy/three-gltf-viewer">
+			<a class="item" target="_blank" href="https://github.com/JJManner/three-gltf-viewer-with-environment-rotation">
 				github
 			</a>
 		</footer>
