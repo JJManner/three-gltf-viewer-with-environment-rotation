@@ -61,14 +61,14 @@ export class Viewer {
 		this.mixer = null;
 		this.clips = [];
 		this.gui = null;
-		this.rotateCamera = -2; // use a value from 3 to -3 to rotate and scale the model camera view, THIS VALUE should be included in the opening link
+		this.rotateCamera = 2; // use a value from 3 to -3 to rotate and scale the model camera view, THIS VALUE should be included in the opening link
 
 		this.state = {
 			environment:
 				options.preset === Preset.ASSET_GENERATOR
 					? environments.find((e) => e.id === 'footprint-court').name
-					: environments[5].name, // this defines the environment used, no 2 is the Clear Sky
-			background: true,
+					: environments[3].name, // this defines the environment used, no 2 is the Clear Sky
+			background: false,
 			playbackSpeed: 1.0,
 			actionStates: {},
 			camera: DEFAULT_CAMERA,
@@ -80,7 +80,7 @@ export class Viewer {
 			backgroundBlurriness: 0,
 
 			// Lights
-			punctualLights: false,
+			punctualLights: true,
 			exposure: 0, // this exposure varies by the model, THIS VALUE should be included in the opening link 
 			toneMapping: LinearToneMapping,
 			ambientIntensity: 0.3,
@@ -108,7 +108,7 @@ export class Viewer {
 		this.scene = new Scene();
 		this.scene.background = this.backgroundColor;
 
-		const fov = options.preset === Preset.ASSET_GENERATOR ? (0.8 * 180) / Math.PI : 60;
+		const fov = options.preset === Preset.ASSET_GENERATOR ? (0.8 * 180) / Math.PI : 45;
 		const aspect = el.clientWidth / el.clientHeight;
 		this.defaultCamera = new PerspectiveCamera(fov, aspect, 0.01, 1000);
 		this.activeCamera = this.defaultCamera;
@@ -278,7 +278,7 @@ export class Viewer {
 		} else {
 			this.defaultCamera.position.copy(center);
 			this.defaultCamera.position.x += size / 2.0 * this.rotateCamera;
-			this.defaultCamera.position.y += size / 5.0; 
+			this.defaultCamera.position.y += size / 2.0; 
 			this.defaultCamera.position.z += size / 2.0 * this.rotateCamera;
 			this.defaultCamera.lookAt(center);
 		}
@@ -297,7 +297,7 @@ export class Viewer {
 		this.scene.add(object);
 		this.content = object;
 
-		this.state.punctualLights = false;
+		this.state.punctualLights = true;
 
 		this.content.traverse((node) => {
 			if (node.isLight) {
