@@ -61,12 +61,13 @@ export class Viewer {
 		this.mixer = null;
 		this.clips = [];
 		this.gui = null;
+		this.rotateCamera = 2; // use a value from 3 to -3 to rotate and scale the model camera view, THIS VALUE should be included in the opening link
 
 		this.state = {
 			environment:
 				options.preset === Preset.ASSET_GENERATOR
 					? environments.find((e) => e.id === 'footprint-court').name
-					: environments[1].name,
+					: environments[3].name, // this defines the environment used, no 2 is the Clear Sky
 			background: false,
 			playbackSpeed: 1.0,
 			actionStates: {},
@@ -75,18 +76,25 @@ export class Viewer {
 			skeleton: false,
 			grid: false,
 			autoRotate: false,
+			bgRotation: 0,
+			backgroundBlurriness: 0,
 
 			// Lights
-			punctualLights: true,
-			exposure: 0.0,
+			punctualLights: false,
+			exposure: 0, // this exposure varies by the model, THIS VALUE should be included in the opening link 
 			toneMapping: LinearToneMapping,
 			ambientIntensity: 0.3,
 			ambientColor: '#FFFFFF',
 			directIntensity: 0.8 * Math.PI, // TODO(#116)
 			directColor: '#FFFFFF',
-			bgColor: '#191919',
+			bgColor: '#252525', // this defines the solid background colour
 
 			pointSize: 1.0,
+
+			// Instructions
+			Rotation: "1st button + drag",
+			Pan: "2d button + drag",
+			Zoom: "Scroll up / down",
 		};
 
 		this.prevTime = 0;
@@ -100,7 +108,7 @@ export class Viewer {
 		this.scene = new Scene();
 		this.scene.background = this.backgroundColor;
 
-		const fov = options.preset === Preset.ASSET_GENERATOR ? (0.8 * 180) / Math.PI : 60;
+		const fov = options.preset === Preset.ASSET_GENERATOR ? (0.8 * 180) / Math.PI : 45;
 		const aspect = el.clientWidth / el.clientHeight;
 		this.defaultCamera = new PerspectiveCamera(fov, aspect, 0.01, 1000);
 		this.activeCamera = this.defaultCamera;
@@ -269,9 +277,9 @@ export class Viewer {
 			this.defaultCamera.lookAt(new Vector3());
 		} else {
 			this.defaultCamera.position.copy(center);
-			this.defaultCamera.position.x += size / 2.0;
-			this.defaultCamera.position.y += size / 5.0;
-			this.defaultCamera.position.z += size / 2.0;
+			this.defaultCamera.position.x += size / 2.0 * this.rotateCamera;
+			this.defaultCamera.position.y += size / 2.0; 
+			this.defaultCamera.position.z += size / 2.0 * this.rotateCamera;
 			this.defaultCamera.lookAt(center);
 		}
 
@@ -411,6 +419,9 @@ export class Viewer {
 
 		this.getCubeMapTexture(environment).then(({ envMap }) => {
 			this.scene.environment = envMap;
+			this.scene.backgroundRotation.y = this.state.bgRotation * (Math.PI/180); 
+			this.scene.environmentRotation.y = this.state.bgRotation * (Math.PI/180); 
+			// NOTE! both of these are required (scene.backgroundRotation AND scene.environmentRotation) Otherwise lighting environemnt is not correct. Instructions on this matter - https://threejs.org/docs/#api/en/scenes/Scene.environmentRotation - are a really misleading.
 			this.scene.background = this.state.background ? envMap : this.backgroundColor;
 		});
 	}
@@ -523,10 +534,47 @@ export class Viewer {
 			hideable: true,
 		}));
 
+		const infoFolder = gui.addFolder('Help');
+		const text1 = infoFolder.add(this.state, 'Rotation');
+		const text2 = infoFolder.add(this.state, 'Pan');
+		const text3 = infoFolder.add(this.state, 'Zoom');
+
+		// Lighting controls.
+		const lightFolder = gui.addFolder('Lighting');
+		const envMapCtrl = lightFolder.add(
+			this.state,
+			'environment',
+			environments.map((env) => env.name),
+		);
+		envMapCtrl.onChange(() => this.updateEnvironment());
+		const envBackgroundCtrl = lightFolder.add(this.state, 'background');
+		// rotate environment angle selector start
+		const envBackRotation = lightFolder.add(
+			this.state, 
+			'bgRotation', 
+			-180,180,0.01,
+	
+		); 
+		envBackRotation.onChange(() => this.updateEnvironment());
+		// rotate environment angle selector end
+		envBackgroundCtrl.onChange(() => this.updateEnvironment());
+		[
+			lightFolder.add(this.state, 'exposure', -10, 10, 0.01),
+			lightFolder.add(this.state, 'punctualLights').listen(),
+			lightFolder.add(this.scene, 'backgroundBlurriness', 0, 1, 0.01), //blurriness
+			lightFolder.add(this.state, 'toneMapping', {
+				Linear: LinearToneMapping,
+				'ACES Filmic': ACESFilmicToneMapping,
+			}),
+			lightFolder.add(this.state, 'ambientIntensity', 0, 2),
+			lightFolder.addColor(this.state, 'ambientColor'),
+			lightFolder.add(this.state, 'directIntensity', 0, 4), // TODO(#116)
+			lightFolder.addColor(this.state, 'directColor'),
+		].forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
+
 		// Display controls.
 		const dispFolder = gui.addFolder('Display');
-		const envBackgroundCtrl = dispFolder.add(this.state, 'background');
-		envBackgroundCtrl.onChange(() => this.updateEnvironment());
+
 		const autoRotateCtrl = dispFolder.add(this.state, 'autoRotate');
 		autoRotateCtrl.onChange(() => this.updateDisplay());
 		const wireframeCtrl = dispFolder.add(this.state, 'wireframe');
@@ -540,27 +588,6 @@ export class Viewer {
 		pointSizeCtrl.onChange(() => this.updateDisplay());
 		const bgColorCtrl = dispFolder.addColor(this.state, 'bgColor');
 		bgColorCtrl.onChange(() => this.updateBackground());
-
-		// Lighting controls.
-		const lightFolder = gui.addFolder('Lighting');
-		const envMapCtrl = lightFolder.add(
-			this.state,
-			'environment',
-			environments.map((env) => env.name),
-		);
-		envMapCtrl.onChange(() => this.updateEnvironment());
-		[
-			lightFolder.add(this.state, 'toneMapping', {
-				Linear: LinearToneMapping,
-				'ACES Filmic': ACESFilmicToneMapping,
-			}),
-			lightFolder.add(this.state, 'exposure', -10, 10, 0.01),
-			lightFolder.add(this.state, 'punctualLights').listen(),
-			lightFolder.add(this.state, 'ambientIntensity', 0, 2),
-			lightFolder.addColor(this.state, 'ambientColor'),
-			lightFolder.add(this.state, 'directIntensity', 0, 4), // TODO(#116)
-			lightFolder.addColor(this.state, 'directColor'),
-		].forEach((ctrl) => ctrl.onChange(() => this.updateLights()));
 
 		// Animation controls.
 		this.animFolder = gui.addFolder('Animation');
