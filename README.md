@@ -1,10 +1,10 @@
-# glTF Viewer
+# glTF Viewer with Environment Rotation and Simplified User Interface 
 
-Preview glTF 2.0 models in WebGL using three.js and a drag-and-drop interface.
+Preview glTF 2.0 models in WebGL using three.js and a drag-and-drop interface. 
 
-Viewer: [gltf-viewer.donmccurdy.com](https://gltf-viewer.donmccurdy.com/)
+This version has HDRI environment rotation that can illuminate 3D model from the selected direction. It also has a simplified and re-organised user interface for adjusting the environment visibility and lighting, including also some new .exr backgrounds for user to choose. Background visibility can be activated easier, when it is organised right below the Lighting HDRI environment selection. Also a - **_Help_** - section has been added to inform users how to use the mouse controls. 
 
-![screenshot](https://user-images.githubusercontent.com/1848368/31580352-b7354096-b101-11e7-86d7-f07677835812.png)
+Original Viewer: [gltf-viewer.donmccurdy.com](https://gltf-viewer.donmccurdy.com/)
 
 ## Quickstart
 
@@ -12,6 +12,8 @@ Viewer: [gltf-viewer.donmccurdy.com](https://gltf-viewer.donmccurdy.com/)
 npm install
 npm run dev
 ```
+
+![screenshot](/glTF_GUI_example_2.png)
 
 ## glTF 2.0 Resources
 
