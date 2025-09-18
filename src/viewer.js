@@ -67,7 +67,7 @@ export class Viewer {
 			environment:
 				options.preset === Preset.ASSET_GENERATOR
 					? environments.find((e) => e.id === 'footprint-court').name
-					: environments[3].name, // this defines the environment used, no 2 is the Clear Sky
+					: environments[1].name, // this defines the environment used, no 2 is the Clear Sky
 			background: false,
 			playbackSpeed: 1.0,
 			actionStates: {},
@@ -297,7 +297,7 @@ export class Viewer {
 		this.scene.add(object);
 		this.content = object;
 
-		this.state.punctualLights = true;
+		this.state.punctualLights = false;
 
 		this.content.traverse((node) => {
 			if (node.isLight) {
