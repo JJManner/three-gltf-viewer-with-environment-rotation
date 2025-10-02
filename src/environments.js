@@ -39,4 +39,10 @@ export const environments = [
 		path: 'ulmer_muenster_1k.exr',
 		format: '.exr',
 	},
+		{
+		id: 'studio-small.exr',
+		name: 'Studio Small',
+		path: 'studio_small_08_1k.exr',
+		format: '.exr',
+	},
 ];
